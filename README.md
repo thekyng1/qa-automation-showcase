@@ -4,6 +4,8 @@
 showcase for a four-layer QA automation framework built with Playwright,
 the Postman runtime, MySQL, and LLM evaluation.
 
+[![CI](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ci.yml)
+
 **Main repository:** [thekyng1/qa-automation-framework](https://github.com/thekyng1/qa-automation-framework)
 
 ---
@@ -96,6 +98,8 @@ Page Objects (pages/)
 
 Every push runs the full suite on GitHub Actions — lint, type-check, and
 all tests across the four layers, with reports uploaded as artifacts.
+The badge above is live: it reflects the real status of the latest run
+on `main`.
 
 ## Known limitations (stated honestly)
 

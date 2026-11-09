@@ -76,6 +76,26 @@ Page Objects (pages/)
             statistical pass-rate; mock in CI, DeepSeek opt-in
 ```
 
+## Where it runs — self-hosted ARM64 + GitHub Actions x64
+
+The suite runs in two places, each doing what it does best:
+
+| Environment | Runs | Why there |
+| --- | --- | --- |
+| **Hetzner ARM64 server** (Ubuntu, self-hosted, user `qa`) | `tests/ai` (LLM evals) and `tests/orders-api.spec.ts` (API + real MySQL) | These need no browser; MySQL is provisioned from a **1.5 GB persistent on-disk binary cache** (`/opt/qa/mysql-cache`) |
+| **GitHub Actions (x64)** | The UI suite (login, inventory, e2e/checkout) | Chromium/WebKit have no ARM64 builds — browsers live where the cloud has x64 |
+| **`qa-console`** (systemd service, port 3200) | Run API: `POST /api/run` → suite from an allowlist, results persisted in a run DB | One command triggers a run; history is queryable via `GET /api/runs` |
+
+### The tmpfs incident (a debugging story)
+
+MySQL test runs once filled `/tmp` to 100%: `/tmp` is a 1.9 GB tmpfs backed
+by RAM, and repeated MySQL binary extractions — plus suspended runs piling
+up garbage — exhausted it. Diagnosis: `df -h` + `findmnt`. The fix required
+**zero code changes**: the `qa-console` systemd unit exports
+`TMPDIR=/opt/qa/mysql-cache`, so binaries extract once and are reused. As a
+safety net, `globalTimeout: 10m` in `playwright.config.ts` guarantees a
+blocked run dies as *interrupted* instead of hanging forever.
+
 ## Key engineering decisions (and why)
 
 | # | Decision | Why |

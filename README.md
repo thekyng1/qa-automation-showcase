@@ -5,6 +5,7 @@ showcase for a four-layer QA automation framework built with Playwright,
 the Postman runtime, MySQL, and LLM evaluation.
 
 [![CI](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ci.yml)
+[![AI Real Eval](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ai-real.yml/badge.svg)](https://github.com/thekyng1/qa-automation-framework/actions/workflows/ai-real.yml)
 
 **Main repository:** [thekyng1/qa-automation-framework](https://github.com/thekyng1/qa-automation-framework)
 
@@ -49,8 +50,10 @@ non-deterministic output:
 - **Statistical thresholds:** each case runs 5 times; pass-rate must be
   ≥80%. One lucky answer proves nothing.
 - **Free, deterministic CI:** the suite runs on a scripted mock adapter —
-  no network, no cost, no flakes. Real DeepSeek runs are opt-in
-  (`AI_EVAL_MODE=real`); the API key lives in GitHub Secrets, never in code.
+  no network, no cost, no flakes. Real DeepSeek runs are opt-in via a
+  manual GitHub Actions workflow (`ai-real.yml`) — triggered on demand,
+  executed fully in the cloud; the API key lives in GitHub Secrets, never
+  in code.
 - **Provider-agnostic:** `LlmAdapter` is an interface — swapping DeepSeek
   for OpenAI, Groq, or Gemini is one file, zero test changes.
 
@@ -91,7 +94,7 @@ Page Objects (pages/)
 | Transactional DB fixture with rollback | `fixtures/db.fixture.ts` |
 | Live API capture wired into Playwright | `playwright.config.ts` (`withPostman`) |
 | Page Object Model, clean and reusable | `pages/` |
-| CI pipeline (GitHub Actions) | `.github/workflows/ci.yml` |
+| CI pipeline (mock, on every push) + real-AI eval workflow (manual, cloud) | `.github/workflows/ci.yml` and `.github/workflows/ai-real.yml` |
 | Design notes & limitations | `README.md` |
 
 ## CI
@@ -100,6 +103,11 @@ Every push runs the full suite on GitHub Actions — lint, type-check, and
 all tests across the four layers, with reports uploaded as artifacts.
 The badge above is live: it reflects the real status of the latest run
 on `main`.
+
+The **AI Real Eval** badge tracks a separate, manually triggered workflow
+(`ai-real.yml`) that runs the same evals against the **live DeepSeek API**
+— on demand, so cost stays under control, and fully in the cloud, so it
+needs nothing from the local machine.
 
 ## Known limitations (stated honestly)
 

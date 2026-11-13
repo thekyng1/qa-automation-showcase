@@ -96,6 +96,58 @@ up garbage — exhausted it. Diagnosis: `df -h` + `findmnt`. The fix required
 safety net, `globalTimeout: 10m` in `playwright.config.ts` guarantees a
 blocked run dies as *interrupted* instead of hanging forever.
 
+## CI integration showcase: ParentalNightControl → GitHub Actions → QA Console
+
+The console doesn't just run its own suites — it can trigger and track the
+**real CI of a separate project**. This integration is end-to-end and
+verified: the QA Console triggers the actual test suite of a separate
+Android project (**ParentalNightControl**) on GitHub Actions, waits for
+the verdict, and records the real numbers in its run history.
+
+### Architecture
+
+```text
+QA Console (port 3200) ──► pnc-run.sh ──► gh workflow run
+  (systemd: qa-console.service)         "Android Unit Tests" @ develop
+                                              │
+                                              ▼
+                                   GitHub Actions job `unit-tests`
+                                   (JDK 17 + Gradle, all modules)
+                                              │
+                                              ▼
+                              artifact pnc-test-summary.json ──► run history
+```
+
+### How a run works
+
+1. `POST /api/run {"suite":"pnc-shared"}` — Console captures the last run ID
+   **before** dispatch, then triggers `workflow_dispatch` on `develop`.
+2. The new run ID is detected (race-safe), then `gh run watch` follows it live.
+3. On completion, the `pnc-test-summary.json` artifact is downloaded and the
+   results (total / passed / failed / skipped / flaky) are stored in history.
+
+### Verified result (2026-11-13)
+
+- GitHub run [#43468410566](https://github.com/thekyng1/ParentalNightControl/actions/runs/43468410566)
+- Job `unit-tests` — **1668 / 1668 tests passed**, 0 failed, 0 flaky, 0 skipped
+- CI exit=0 · ~6 min wall clock · test duration 41.2s
+
+### Debugging notes (things worth remembering)
+
+- **GitHub API race:** a `workflow_dispatch` run does not appear instantly;
+  capturing "last run ID" after dispatch can catch the new run itself.
+  Fix: capture `BEFORE` before dispatch (commit `dbfcd23`).
+- **Invisible child output:** `spawn()` without `stdio: 'inherit'` swallows
+  script logs — never debug blind; make the child inherit stdout/stderr.
+- **Phantom respawner:** an old systemd unit was silently restarting a
+  stale console process (restart counter: 251). The durable fix was not
+  repeated `kill`s, but replacing the unit file itself
+  (`/etc/systemd/system/qa-console.service`, runs as root for `gh` auth).
+- **`workflow_dispatch` and branches:** GitHub only lists workflows from the
+  **default branch** (`master`) even when dispatching on another branch —
+  the workflow file must exist on both (commit `39121e6`), while the dispatch
+  targets `develop` so the tests run on the complete code.
+
 ## Key engineering decisions (and why)
 
 | # | Decision | Why |
@@ -108,7 +160,7 @@ blocked run dies as *interrupted* instead of hanging forever.
 ## What to look at in the main repo
 
 | If you want to see… | Open… |
-| --- | --- |
+| --- | --- | --- |
 | The closed-loop test (UI → API → DB in one flow) | the `tests/` directory |
 | LLM evals with statistical thresholds | the `ai/` directory and `tests/ai/` |
 | Transactional DB fixture with rollback | `fixtures/db.fixture.ts` |
@@ -142,10 +194,11 @@ needs nothing from the local machine.
 ---
 
 **Questions this framework answers in an interview:** How do you structure
-a scalable test automation project? How do you prove persistence? How do
-you isolate test data? How do you wire API assertions into UI flows
-without mocks? How do you test a system that doesn't give the same answer
-twice?
+a scalable test automation project? How do you prove persistence? How do you
+isolate test data? How do you wire API assertions into UI flows without
+mocks? How do you test a system that doesn't give the same answer twice?
+How do you wire a local tool to a remote project's CI — and debug it when
+the API, the logging, and the process manager all hide the truth?
 
 The answers are in the
 [main repository](https://github.com/thekyng1/qa-automation-framework).

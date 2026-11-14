@@ -23,7 +23,7 @@ click and the database there are two more layers where real bugs hide:
 2. **The persistence layer** — the request may succeed yet never commit,
    commit twice, or write wrong values.
 3. **The AI layer** — a chatbot answer can be fluent, plausible, and still
-   wrong, malformed, or over budget. Green toasts prove nothing here either.
+   be wrong, malformed, or over budget. Green toasts prove nothing here either.
 
 This framework closes the loop. Every critical user flow is asserted at
 all four layers, in one test:
@@ -148,6 +148,50 @@ QA Console (port 3200) ──► pnc-run.sh ──► gh workflow run
   the workflow file must exist on both (commit `39121e6`), while the dispatch
   targets `develop` so the tests run on the complete code.
 
+## SiteGuard — productionized: automated site monitoring as a service
+
+The same engineering, applied to a real problem: **websites break quietly,
+customers notice first.** SiteGuard is a monitoring service built on this
+framework's discipline — every day, on schedule, it scans each client site
+and proves it still works.
+
+**Live demo (real data, updated daily):**
+👉 **https://thekyng1.github.io/siteguard-dashboard/**
+
+| Check | What it proves |
+| --- | --- |
+| Broken links (crawl, robots-aware) | Every page on the site still resolves |
+| SSL certificate health | The certificate is valid, with runway left |
+| Mobile viewport | No horizontal scroll — the site works on a phone |
+| Page speed | Time-to-first-byte + load stays inside budget |
+
+### Architecture
+
+```text
+GitHub Actions cron (05:00 UTC daily)
+   |
+   v
+Playwright headless scan (per client site, from sites.json)
+   |
+   +--> critical? --> email alert (Resend)
+   |
+   v
+sanitized report (no client emails) --> reports/report.json
+   |
+   v
+GitHub Pages dashboard — public per-client status cards
+```
+
+- **Zero infrastructure cost:** the entire pipeline — scanning, alerting,
+  reporting, and the public dashboard — runs on GitHub Actions + GitHub
+  Pages, with nothing to install for the client and nothing to maintain
+  on a server.
+- **Client privacy by design:** the public dashboard shows only client ID,
+  site URL, and metrics. Alert emails and client config live in a private
+  repository and never reach the public site.
+- **One line to onboard a client:** add the site to `sites.json` — the
+  first automatic scan runs the next morning.
+
 ## Key engineering decisions (and why)
 
 | # | Decision | Why |
@@ -160,7 +204,7 @@ QA Console (port 3200) ──► pnc-run.sh ──► gh workflow run
 ## What to look at in the main repo
 
 | If you want to see… | Open… |
-| --- | --- | --- |
+| --- | --- |
 | The closed-loop test (UI → API → DB in one flow) | the `tests/` directory |
 | LLM evals with statistical thresholds | the `ai/` directory and `tests/ai/` |
 | Transactional DB fixture with rollback | `fixtures/db.fixture.ts` |

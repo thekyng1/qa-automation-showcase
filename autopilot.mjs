@@ -14,9 +14,10 @@ import { spawnSync } from 'child_process';
 const CAND = 'candidates.json';
 const QUEUE = 'queue.json';
 const MAX_QUEUE = 10;
-// Comanda suitei tale QA, cu <domain> ca substituent.
-// Exemplu real: 'node ~/demo-prospect/worker.mjs <domain> --report'
-const AUDIT_CMD = 'echo "[inlocuieste AUDIT_CMD in autopilot.mjs cu comanda suitei tale QA]" <domain>';
+// Comanda suitei de audit public (audit.mjs — doar cereri publice de citire,
+// nicio comandă plasată, nicio plată). <domain> e substituit automat.
+// Ieșiri: <slug>/index.html (raport pentru GitHub Pages) + reports/<slug>.json
+const AUDIT_CMD = 'node audit.mjs <domain>';
 
 const loadCand = () => fs.existsSync(CAND) ? JSON.parse(fs.readFileSync(CAND, 'utf8')) : { candidates: [] };
 const loadQueue = () => fs.existsSync(QUEUE) ? JSON.parse(fs.readFileSync(QUEUE, 'utf8')) : { queue: [] };

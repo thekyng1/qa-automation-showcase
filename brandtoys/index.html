@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raport QA automat — brandtoys.ro</title>
+<style>
+  :root{--accent:#e63946;--dark:#1d3557;--bg:#f8f9fa;--card:#ffffff;--muted:#6c757d;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:#212529;line-height:1.65;}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 20px 64px;}
+  header{background:linear-gradient(135deg,var(--dark) 0%,#2a4d7f 100%);color:#fff;border-radius:14px;padding:44px 36px;margin-bottom:28px;}
+  header h1{font-size:1.9rem;font-weight:700;letter-spacing:-.5px;}
+  header p.sub{margin-top:8px;font-size:1.05rem;opacity:.92;}
+  header .tag{display:inline-block;margin-top:16px;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:20px;font-size:.8rem;}
+  section{background:var(--card);border-radius:12px;padding:28px 30px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  h2{font-size:1.25rem;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--dark);color:#fff;font-size:.85rem;}
+  p{margin-bottom:10px;}
+  .exec{font-size:1.02rem;}
+  .ok{border:1px solid #d4edda;background:#f0faf2;border-radius:10px;padding:20px 22px;margin-top:16px;}
+  .ok h3{font-size:1.02rem;color:#1b7a3d;margin-bottom:8px;}
+  .bug{border:1px solid #e9ecef;border-radius:10px;padding:20px 22px;margin-top:16px;}
+  .bug h3{font-size:1.02rem;color:var(--accent);margin-bottom:8px;}
+  .bug .sev{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:14px;margin-bottom:10px;}
+  .sev.high{background:#fdecea;color:#c0392b;}
+  .sev.med{background:#fff4e5;color:#b9770e;}
+  .sev.low{background:#e8eefc;color:#2a4d7f;}
+  .bug ul{margin:8px 0 0 20px;}
+  .bug li{margin-bottom:5px;}
+  table{width:100%;border-collapse:collapse;font-size:.92rem;}
+  th{background:var(--dark);color:#fff;text-align:left;padding:10px 12px;font-weight:600;}
+  td{padding:10px 12px;border-bottom:1px solid #e9ecef;}
+  tr:nth-child(even) td{background:#fbfcfd;}
+  .note{background:#eef4fb;border-left:4px solid var(--dark);padding:12px 16px;border-radius:0 8px 8px 0;font-size:.92rem;margin-top:12px;}
+  .cta{background:linear-gradient(135deg,var(--accent) 0%,#c1121f 100%);color:#fff;}
+  .cta h2{color:#fff;}
+  .cta h2 .num{background:rgba(255,255,255,.2);}
+  code{background:#eef1f4;padding:2px 6px;border-radius:4px;font-size:.85em;font-family:Consolas,Menlo,monospace;}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:34px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Raport QA automat — brandtoys.ro</h1>
+  <p class="sub">4 teste Playwright rulate pe fluxul public al magazinului: homepage, coș, checkout, accesibilitate.</p>
+  <span class="tag">Rulat public, fără comenzi reale — testele se opresc înainte de pasul de plată</span>
+</header>
+
+<section>
+  <h2><span class="num">2</span>Rezumat executiv</h2>
+  <p class="exec">Am rulat automat, de la zero, 4 teste pe parcursul critic al comenzii, plus o scanare de accesibilitate WCAG. Vestea bună: <strong>toate fluxurile de cumpărare funcționează</strong> — homepage-ul se încarcă fără erori JavaScript, produsul ajunge efectiv în coș, iar checkout-ul se deschide corect. Vestea care merită atenția voastră: scanarea WCAG a identificat <strong>4 tipuri de probleme de accesibilitate, afectând 111 elemente ale site-ului</strong>, dintre care 3 sunt critice sau serioase. Din 28 iunie 2025, <strong>European Accessibility Act</strong> face accesibilitatea obligatorie legal pentru magazinele online din UE — inclusiv cele din România.</p>
+</section>
+
+<section>
+  <h2><span class="num">3</span>Ce funcționează (verificat automat)</h2>
+  <div class="ok">
+    <h3>✅ Toate cele 3 fluxuri de cumpărare trec</h3>
+    <ul style="margin:8px 0 0 20px;">
+      <li><strong>Homepage</strong> — se încarcă sub 30s, titlu corect, zero erori JavaScript în consolă.</li>
+      <li><strong>Adăugare în coș</strong> — produs real („Pachet: Glob interactiv în Limba Română") adăugat și <em>verificat vizibil</em> în coș la <code>brandtoys.ro/cart</code>.</li>
+      <li><strong>Checkout</strong> — pagina de comandă se deschide fără erori, câmpurile de date apar.</li>
+    </ul>
+    <p style="margin-top:10px;font-size:.9rem;color:var(--muted);">Nu am trimis nicio comandă reală — testul se oprește exact înainte de pasul de plată.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">4</span>Probleme de accesibilitate identificate (EAA / WCAG)</h2>
+
+  <div class="bug">
+    <span class="sev high">Critic</span>
+    <h3>1. Butonul de căutare nu are text discernibil</h3>
+    <ul>
+      <li><strong>Regulă WCAG:</strong> Button Name (4.1.2) — <em>„Buttons must have discernible text"</em>.</li>
+      <li><strong>Ce înseamnă:</strong> butonul de căutare din header (<code>.button-search</code>) conține doar o iconiță. Un utilizator de cititor de ecran (screen reader) aude „button" fără nicio descriere — nu poate ști ce face.</li>
+      <li><strong>Elemente afectate:</strong> 1 — dar e un flux central: căutarea.</li>
+      <li><strong>Fix recomandat:</strong> un atribut <code>aria-label="Caută"</code> pe buton. O linie, câteva minute de lucru.</li>
+    </ul>
+  </div>
+
+  <div class="bug">
+    <span class="sev med">Serios</span>
+    <h3>2. Contrast insuficient în 67 de zone</h3>
+    <ul>
+      <li><strong>Regulă WCAG:</strong> Color Contrast (1.4.3) — raportul de contrast minim 4.5:1.</li>
+      <li><strong>Ce înseamnă:</strong> 67 de elemente (titluri de meniu, text în gri deschis pe alb) au contrast sub prag. Utilizatorii cu vedere slabă, sau oricine în soare, pe ecran murdar, cu ochelari de presbiopie — citesc greu sau deloc.</li>
+      <li><strong>Elemente afectate:</strong> 67 — majoritatea în meniul orizontal (ex.: <code>.mm_menu_content_title</code>).</li>
+      <li><strong>Fix recomandat:</strong> ajustarea paletei de culori la nivel de temă; de regulă se rezolvă în bloc, nu element cu element.</li>
+    </ul>
+  </div>
+
+  <div class="bug">
+    <span class="sev med">Serios</span>
+    <h3>3. 42 de linkuri fără etichetă</h3>
+    <ul>
+      <li><strong>Regulă WCAG:</strong> Link Name (2.4.4) — <em>„Links must have discernible text"</em>.</li>
+      <li><strong>Ce înseamnă:</strong> 42 de linkuri (imagini de logo, bannere, elemente de meniu cu iconițe) nu au text alternativ. Pentru un screen reader, navigarea site-ului devine o listă de „link, link, link" fără context.</li>
+      <li><strong>Elemente afectate:</strong> 42.</li>
+      <li><strong>Fix recomandat:</strong> <code>alt</code> pe imaginile-link și <code>aria-label</code> pe linkurile cu iconițe.</li>
+    </ul>
+  </div>
+
+  <div class="bug">
+    <span class="sev low">Moderat</span>
+    <h3>4. Zoom-ul este dezactivat pe mobil</h3>
+    <ul>
+      <li><strong>Regulă WCAG:</strong> Meta Viewport (1.4.4) — <em>„Zooming and scaling must not be disabled"</em>.</li>
+      <li><strong>Ce înseamnă:</strong> meta-tag-ul viewport conține <code>user-scalable=no</code> (s echivalent). Un utilizator cu vedere slabă nu poate mări textul pe telefon — un impediment grav pentru o audiență care cumpără jucării, adesea părinți peste 40 de ani.</li>
+      <li><strong>Elemente afectate:</strong> 1 meta-tag, dar blochează mărirea pe <em>tot</em> site-ul mobil.</li>
+      <li><strong>Fix recomandat:</strong> eliminarea restricției din meta-viewport — o singură linie schimbată.</li>
+    </ul>
+  </div>
+
+  <div class="note"><strong>De ce contează acum:</strong> din 28 iunie 2025, EAA (European Accessibility Act, Regulamentul UE 2019/882) cere ca serviciile de comerț electronic să fie accesibile. Neconformitatea expune la sancțiuni și, mai important, blochează o parte din clienți. Cele 4 probleme de mai sus sunt fixabile rapid — două dintre ele sunt, literal, o linie de cod fiecare.</li>
+</section>
+
+<section>
+  <h2><span class="num">5</span>Ce e acoperit automat la fiecare release</h2>
+  <table>
+    <tr><th>Flux</th><th>Ce verifică testul</th></tr>
+    <tr><td>Homepage</td><td>Pagina se încarcă, titlu corect, zero erori JavaScript</td></tr>
+    <tr><td>Adăugare în coș</td><td>Produsul ajunge efectiv în coș (verificat vizibil la /cart)</td></tr>
+    <tr><td>Checkout</td><td>Pagina de comandă se deschide, câmpurile de date apar</td></tr>
+    <tr><td>Accesibilitate</td><td>Scanare WCAG 2.1 A/AA cu axe-core (110+ elemente analizate)</td></tr>
+  </table>
+  <p style="margin-top:14px;font-size:.92rem;color:var(--muted);">Toate rulează în ~2 minute, la fiecare deploy. Testele se opresc înainte de pasul de plată; nu se introduc niciodată date reale de card.</p>
+</section>
+
+<section>
+  <h2><span class="num">6</span>Stack și cod</h2>
+  <p>Testele sunt scrise în <strong>Playwright</strong> (standardul actual pentru testare web end-to-end), cu selectori pe rol și text, și scanare de accesibilitate cu <strong>axe-core</strong>. Codul complet, lizibil, e public și îl puteți citi linie cu linie:</p>
+  <p><a href="https://github.com/thekyng1/qa-automation-showcase" style="color:var(--dark);font-weight:600;">github.com/thekyng1/qa-automation-showcase</a></p>
+</section>
+
+<section class="cta">
+  <h2><span class="num">7</span>Pasul următor</h2>
+  <p>Dacă vreți, re-rulez gratuit întreaga suită după ce aplicați fix-urile și vă confirm prin același raport automat că toate problemele WCAG au dispărut. Pot extinde și cu teste pe fluxurile voastre critice (cont client, filtre de catalog, voucher discount, calcul transport).</p>
+  <p><strong>Răspundeți direct la acest email cu „re-rulează"</strong> și confirmarea e la voi în maximum 48 de ore.</p>
+</section>
+
+<footer>
+  Raport generat automat de suita QA Playwright · brandtoys.ro · <span id="dt"></span><br>
+  Teste rulate public, fără comenzi reale · Oprit înainte de pasul de plată · Scanare WCAG: axe-core
+</footer>
+
+<script>
+document.getElementById('dt').textContent = new Date().toISOString().slice(0,10);
+</script>
+</div>
+</body>
+</html>

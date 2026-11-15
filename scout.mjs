@@ -16,7 +16,7 @@ const SHOP = /(adaug[ăa][^<]{0,15}co[sș]|co[sș] de cump[ăa]r[ăa]turi|checko
 const GOOD = /(comenzi|office|contact|vanzari|sales|info|hello|admin|client)@/i;
 const BAD  = /(example|sentry|wix|squarespace|no-?reply|noreply|domain|abuse|webmaster|privacy|gdpr|postmaster|hostmaster)@/i;
 // giganți și non-magazine: au QA proprii sau nu sunt clienți
-const SKIP_DOMAIN = /(emag|altex|dedeman|decathlon|pcgarage|okazii|olx\.ro|shopmania|compari|facebook|instagram|youtube|tiktok|linkedin|wikipedia|blog|forum|stiri|anunturi|libertatea|adevarul|digi)/i;
+const SKIP_DOMAIN = /(emag|altex|dedeman|decathlon|pcgarage|okazii|olx\.ro|shopmania|compari|facebook|instagram|youtube|tiktok|linkedin|wikipedia|blog|forum|stiri|anunturi|libertatea|adevarul|digi|mojeek|duckduckgo)/i;
 const MAX_PER_QUERY = 10;
 
 // --- Nisele: unde un audit QA aduce cel mai multă valoare ---
@@ -71,17 +71,28 @@ function extractDomains(html){
     if(u) href = decodeURIComponent(u[1]);
     try { const d = roDomain(new URL(href).hostname); if(d) out.add(d); } catch {}
   }
+  // fallback: orice URL .ro din text (prinde și linkurile care nu sunt în <a href>)
+  for(const m2 of html.matchAll(/https?:\/\/(?:www\.)?([a-z0-9-]+(?:\.[a-z0-9-]+)*\.ro)\b/gi)){
+    const d = roDomain(m2[1].toLowerCase());
+    if(d) out.add(d);
+  }
   return [...out];
 }
 
 async function search(query){
   let domains = [];
-  const ddg = await get('https://html.duckduckgo.com/html/?q='+encodeURIComponent(query));
-  if(ddg) domains = extractDomains(ddg);
-  if(domains.length < 5){
-    await sleep(1200);
-    const bing = await get('https://www.bing.com/search?q='+encodeURIComponent(query)+'&cc=ro');
-    if(bing) domains = [...new Set([...domains, ...extractDomains(bing)])];
+  // 4 surse în lanț: dacă una e rate-limitată, următoarea preia
+  const sources = [
+    'https://html.duckduckgo.com/html/?q=',
+    'https://lite.duckduckgo.com/lite/?q=',
+    'https://www.mojeek.com/search?q=',
+    'https://search.brave.com/search?q=',
+  ];
+  for(const s of sources){
+    if(domains.length >= 5) break;
+    if(domains.length) await sleep(1200);
+    const html = await get(s + encodeURIComponent(query));
+    if(html) domains = [...new Set([...domains, ...extractDomains(html)])];
   }
   return domains.slice(0, MAX_PER_QUERY);
 }
@@ -122,6 +133,10 @@ async function checkDomain(domain){
 async function runNiche(niche, known){
   console.log(`\n🔎 Nisă: ${niche.id} (${niche.q}) — prioritate ${niche.score}/3`);
   const domains = await search(niche.q);
+  if(!domains.length){
+    console.log(`   ⚠ căutarea nu a returnat nimic (motoarele pot fi temporar limitate) — încearcă din nou peste câteva minute`);
+    return 0;
+  }
   let added = 0;
   for(const d of domains){
     if(known.has(d)) { console.log(`   ↷ ${d} — deja cunoscut, sar`); continue; }
@@ -146,8 +161,9 @@ if(cmd === 'niches'){
   const db = load();
   if(!db.candidates.length){ console.log('Niciun candidat. Rulează: node scout.mjs run'); process.exit(0); }
   let list = db.candidates;
-  if(cmd === 'best') list = [...list].sort((a,b)=>b.score-a.score);
-  console.log(list.map(c => `${c.domain.padEnd(22)} ${c.email.padEnd(26)} ${c.niche.padEnd(13)} score=${c.score} ${c.status} ${c.foundAt}`).join('\n'));
+  if(cmd === 'best') list = [...list].sort((a,b)=>(b.score||0)-(a.score||0));
+  // fallback-uri pentru candidații găsiți de versiunile vechi (fără câmpul niche/score)
+  console.log(list.map(c => `${(c.domain||'?').padEnd(22)} ${(c.email||'-').padEnd(26)} ${(c.niche||c.kw||'-').padEnd(13)} score=${c.score||0} ${c.status||'-'} ${c.foundAt||c.gasit||'-'}`).join('\n'));
   console.log(`\nTotal: ${list.length} candidați`);
 } else if(cmd === 'run'){
   let niches, label;

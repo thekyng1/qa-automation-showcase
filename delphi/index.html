@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raport QA automat — delphionline.ro</title>
+<style>
+  :root{--accent:#e63946;--dark:#1d3557;--bg:#f8f9fa;--card:#ffffff;--muted:#6c757d;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:#212529;line-height:1.65;}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 20px 64px;}
+  header{background:linear-gradient(135deg,var(--dark) 0%,#2a4d7f 100%);color:#fff;border-radius:14px;padding:44px 36px;margin-bottom:28px;}
+  header h1{font-size:1.9rem;font-weight:700;letter-spacing:-.5px;}
+  header p.sub{margin-top:8px;font-size:1.05rem;opacity:.92;}
+  header .tag{display:inline-block;margin-top:16px;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:20px;font-size:.8rem;}
+  section{background:var(--card);border-radius:12px;padding:28px 30px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  h2{font-size:1.25rem;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--dark);color:#fff;font-size:.85rem;}
+  p{margin-bottom:10px;}
+  .exec{font-size:1.02rem;}
+  .bug{border:1px solid #e9ecef;border-radius:10px;padding:20px 22px;margin-top:16px;}
+  .bug h3{font-size:1.02rem;color:var(--accent);margin-bottom:8px;}
+  .bug .sev{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:14px;margin-bottom:10px;}
+  .sev.high{background:#fdecea;color:#c0392b;}
+  .sev.med{background:#fff4e5;color:#b9770e;}
+  .bug ul{margin:8px 0 0 20px;}
+  .bug li{margin-bottom:5px;}
+  .bug img{max-width:100%;border:1px solid #dee2e6;border-radius:8px;margin-top:14px;display:block;}
+  .bug .cap{font-size:.8rem;color:var(--muted);margin-top:6px;}
+  table{width:100%;border-collapse:collapse;font-size:.92rem;}
+  th{background:var(--dark);color:#fff;text-align:left;padding:10px 12px;font-weight:600;}
+  td{padding:10px 12px;border-bottom:1px solid #e9ecef;}
+  tr:nth-child(even) td{background:#fbfcfd;}
+  .note{background:#eef4fb;border-left:4px solid var(--dark);padding:12px 16px;border-radius:0 8px 8px 0;font-size:.92rem;margin-top:12px;}
+  .cta{background:linear-gradient(135deg,var(--accent) 0%,#c1121f 100%);color:#fff;}
+  .cta h2{color:#fff;}
+  .cta h2 .num{background:rgba(255,255,255,.2);}
+  code{background:#eef1f4;padding:2px 6px;border-radius:4px;font-size:.85em;font-family:Consolas,Menlo,monospace;}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:34px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Raport QA automat — delphionline.ro</h1>
+  <p class="sub">6 teste Playwright rulate pe fluxul public al magazinului: homepage, căutare, coș, cantitate, checkout.</p>
+  <span class="tag">Rulat public, fără comenzi reale — testele se opresc înainte de pasul de plată</span>
+</header>
+
+<section>
+  <h2><span class="num">2</span>Rezumat executiv</h2>
+  <p class="exec">Am rulat automat, de la zero, 6 teste pe parcursul critic al comenzii: căutarea produsului → adăugarea în coș → modificarea cantității → deschiderea checkout-ului. Toate cele 6 teste trec. Pe parcurs am identificat <strong>2 probleme reale</strong> care merită atenția voastră — ambele ușor de ignorat în uz normal, dar cu potențial direct de a bloca comenzi sau de a rupe integrări (analytics, remarketing, automatizări). Costul fixării lor este de câteva minute fiecare; costul ignorării lor apare exact când nu te aștepți.</p>
+</section>
+
+<section>
+  <h2><span class="num">3</span>Probleme identificate</h2>
+
+  <div class="bug">
+    <span class="sev high">Impact ridicat</span>
+    <h3>1. Butonul „Adaugă în coș" nu e consecvent între pagini</h3>
+    <ul>
+      <li><strong>Ce am găsit:</strong> pe pagina de produs, „Adaugă în coș" este un <code>&lt;button&gt;</code>, dar pe pagina de catalog același element este un <code>&lt;a&gt;</code> (link).</li>
+      <li><strong>Pași de reproducere:</strong> deschideți o pagină de catalog, inspectați butonul „Adaugă în coș" (tag <code>&lt;a&gt;</code>); deschideți apoi o pagină de produs individual — același buton e tag <code>&lt;button&gt;</code>.</li>
+      <li><strong>Impact estimat:</strong> orice script JavaScript, tag de analytics sau remarketing care se leagă de butonul de add-to-cart pe baza tipului de element va funcționa pe o pagină și va tăcea pe cealaltă. Tradus în bani: remarketing-ul care urmărește abandonele de coș sau event-urile „add to cart" din Google Analytics pot raporta doar parțial — deciziile voastre de marketing se iau pe date incomplete, iar o regresie viitoare aici blochează direct adăugarea în coș = comenzi pierdute.</li>
+      <li><strong>Fix recomandat:</strong> uniformizarea markup-ului (același tip de element pe toate paginile) sau un <code>data-attribute</code> comun pe ambele variante.</li>
+    </ul>
+    <img src="bug-1-adauga-in-cos.png" alt="Diferența de markup a butonului Adauga in cos intre catalog si pagina de produs">
+    <p class="cap">Aceeași acțiune, două tipuri de elemente diferite — sursa clasică de regresii tăcute.</p>
+  </div>
+
+  <div class="bug">
+    <span class="sev med">Impact mediu</span>
+    <h3>2. Butonul „Trimite comanda" există în două versiuni, iar cel ascuns apare primul</h3>
+    <ul>
+      <li><strong>Ce am găsit:</strong> în coș există două butoane „Trimite comanda": unul de mobil, ascuns pe desktop (<code>class="cart-mobile-checkout"</code>), și unul de desktop. Elementul mobil apare însă <strong>primul în DOM</strong>.</li>
+      <li><strong>Pași de reproducere:</strong> inspectați pagina coșului și căutați „Trimite comanda" — veți găsi butonul cu clasa <code>cart-mobile-checkout</code> înaintea celui vizibil.</li>
+      <li><strong>Impact estimat:</strong> orice script (analytics, A/B testing, remarketing) sau automatizare care țintește „primul element potrivit" va lua butonul <strong>ascuns</strong> și nu va funcționa — erori de tipul „element is not visible", date de conversie incomplete sau teste care pică fără motiv aparent. E exact genul de detaliu care consumă ore de debugging.</li>
+      <li><strong>Fix recomandat:</strong> afișarea/ascunderea prin CSS pe același element (nu duplicare în DOM), sau măcar ordonarea cu butonul vizibil primul.</li>
+    </ul>
+    <img src="bug-2-trimite-comanda.png" alt="Butonul mobil ascuns de Trimite comanda apare primul in DOM">
+    <p class="cap">Butonul invizibil de mobil, prins primul de selector — blochează orice automatizare naivă.</p>
+  </div>
+
+  <div class="note"><strong>Observație de infrastructură (nu e bug de cod):</strong> serverul aplică rate-limiting agresiv — cereri repetate rapide primesc „Too many requests". E o protecție bună, dar testele automate (și crawler-ele legitime, agenții de comparare prețuri) trebuie configurate cu retry. Suita noastră rulează cu retry automat, exact ca într-un CI de producție.</div>
+</section>
+
+<section>
+  <h2><span class="num">4</span>Ce e acoperit automat la fiecare release</h2>
+  <table>
+    <tr><th>Flux</th><th>Ce verifică testul</th></tr>
+    <tr><td>Homepage</td><td>Pagina se încarcă, titlul corect</td></tr>
+    <tr><td>Căutare</td><td>Căutarea „puzzle" returnează produse cu linkuri funcționale</td></tr>
+    <tr><td>Adăugare în coș</td><td>Produsul ajunge efectiv în coș (verificat prin răspunsul serverului + vizibil în coș)</td></tr>
+    <tr><td>Cantitate</td><td>Creșterea cantității la 2 dublează corect totalul (78,00 → 156,00 RON)</td></tr>
+    <tr><td>Checkout</td><td>Pagina de checkout se deschide fără erori, câmpurile de plată apar</td></tr>
+  </table>
+  <p style="margin-top:14px;font-size:.92rem;color:var(--muted);">Toate rulează în ~2 minute, la fiecare deploy — nu la întâmplare, când își amintește cineva. Testele se opresc înainte de pasul de plată; nu se introduc niciodată date reale de card.</p>
+</section>
+
+<section>
+  <h2><span class="num">5</span>Stack și cod</h2>
+  <p>Testele sunt scrise în <strong>Playwright</strong> (standardul actual pentru testare web end-to-end), cu selectori pe rol și text — nu fragili XPath — și retry integrat, pentru rezistență la variațiile normale ale unui site real.</p>
+  <p>Codul complet, lizibil, e public și îl puteți citi linie cu linie:</p>
+  <p><a href="https://github.com/thekyng1/qa-automation-showcase" style="color:var(--dark);font-weight:600;">github.com/thekyng1/qa-automation-showcase</a></p>
+  <p class="cap" style="font-size:.9rem;color:var(--muted);">Acolo găsiți suita de teste, configurația și alte exemple pe e-commerce, SaaS și fintech.</p>
+</section>
+
+<section class="cta">
+  <h2><span class="num">6</span>Pasul următor</h2>
+  <p>Dacă vreți, extind gratuit suita cu încă 5–10 teste pe fluxurile voastre critice (cont client, filtre de catalog, voucher discount, calcul transport) și vă trimit rezultatul în același format — totul prin email, fără call-uri de vânzări.</p>
+  <p><strong>Răspundeți direct la acest email cu „da, extinde"</strong> și primul raport extins e la voi în maximum 48 de ore.</p>
+</section>
+
+<footer>
+  Raport generat automat de suita QA Playwright · delphionline.ro · <span id="dt"></span><br>
+  Teste rulate public, fără comenzi reale · Oprit înainte de pasul de plată
+</footer>
+
+<script>
+document.getElementById('dt').textContent = new Date().toISOString().slice(0,10);
+</script>
+</div>
+</body>
+</html>

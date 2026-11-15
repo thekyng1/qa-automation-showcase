@@ -31,13 +31,10 @@
   th{background:var(--dark);color:#fff;text-align:left;padding:10px 12px;font-weight:600;}
   td{padding:10px 12px;border-bottom:1px solid #e9ecef;}
   tr:nth-child(even) td{background:#fbfcfd;}
-  .check li{list-style:none;padding:6px 0 6px 28px;position:relative;}
-  .check li::before{content:"✓";position:absolute;left:4px;color:#27ae60;font-weight:700;}
   .note{background:#eef4fb;border-left:4px solid var(--dark);padding:12px 16px;border-radius:0 8px 8px 0;font-size:.92rem;margin-top:12px;}
   .cta{background:linear-gradient(135deg,var(--accent) 0%,#c1121f 100%);color:#fff;}
   .cta h2{color:#fff;}
   .cta h2 .num{background:rgba(255,255,255,.2);}
-  .cta a.btn{display:inline-block;background:#fff;color:var(--accent);font-weight:700;padding:12px 26px;border-radius:8px;text-decoration:none;margin-top:12px;}
   code{background:#eef1f4;padding:2px 6px;border-radius:4px;font-size:.85em;font-family:Consolas,Menlo,monospace;}
   footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:34px;}
 </style>
@@ -85,7 +82,7 @@
     <p class="cap">Butonul invizibil de mobil, prins primul de selector — blochează orice automatizare naivă.</p>
   </div>
 
-  <div class="note"><strong>Observație de infrastructură (nu e bug de cod):</strong> serverul aplică rate-limiting agresiv — cereri repetate rapide primesc „Too many requests". E o protecție bună, dar testele automate (și crawler-ele legitime, agenții de comparare prețuri) trebuie configurate cu retry. Supeata noastră rulează cu retry automat, exact ca într-un CI de producție.</div>
+  <div class="note"><strong>Observație de infrastructură (nu e bug de cod):</strong> serverul aplică rate-limiting agresiv — cereri repetate rapide primesc „Too many requests". E o protecție bună, dar testele automate (și crawler-ele legitime, agenții de comparare prețuri) trebuie configurate cu retry. Suita noastră rulează cu retry automat, exact ca într-un CI de producție.</div>
 </section>
 
 <section>
@@ -112,8 +109,7 @@
 <section class="cta">
   <h2><span class="num">6</span>Pasul următor</h2>
   <p>Dacă vreți, extind gratuit suita cu încă 5–10 teste pe fluxurile voastre critice (cont client, filtre de catalog, voucher discount, calcul transport) și vă trimit rezultatul în același format — totul prin email, fără call-uri de vânzări.</p>
-  <p><strong>Răspundeți cu „da, extinde" pe acest email</strong> și primul raport extinctiv e la voi în maximum 48 de ore.</p>
-  <a class="btn" href="mailto:?subject=Raport%20QA%20delphionline.ro">Răspunde pe email</a>
+  <p><strong>Răspundeți direct la acest email cu „da, extinde"</strong> și primul raport extins e la voi în maximum 48 de ore.</p>
 </section>
 
 <footer>

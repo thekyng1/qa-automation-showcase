@@ -34,7 +34,7 @@ echo ""
 
 # --- starea de dinainte ---
 NODURI_INAINTE=$(sqlite3 "$DB" "SELECT COUNT(*) FROM unelte;")
-LEGATURI_INAINTE=$(sqlite3 "$DB" "SELECT COUNT(*) FROM legaturi;"
+LEGATURI_INAINTE=$(sqlite3 "$DB" "SELECT COUNT(*) FROM legaturi;")
 echo "Stare inainte: $NODURI_INAINTE noduri, $LEGATURI_INAINTE legaturi"
 echo ""
 

@@ -106,7 +106,7 @@ done
 # Daca nu exista istoric de sarcini inca, semnalul raporteaza 0 — onest.
 # ---------------------------------------------------------------------------
 echo "-- Semnal 3: covibrare (colaboreaza_cu) --"
-ISTORIC=$(ls "$HOME/.hermes/cache/scratch/"rezonanta*.json 2>/nulldisclaimer 2>/dev/null | wc -l)
+ISTORIC=$(ls "$HOME/.hermes/cache/scratch/"rezonanta*.json 2>/dev/null | wc -l)
 echo "  Istorice de rezonanta disponibile: $ISTORIC"
 if [ "$ISTORIC" -lt "$PRAG_COVIBRARE" ]; then
   echo "  SUB PRAG: nu exista inca $PRAG_COVIBRARE sarcini cu rezonanta salvata."

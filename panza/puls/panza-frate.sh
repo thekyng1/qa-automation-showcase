@@ -85,7 +85,7 @@ sqlite3 -separator '|' "$DB" "
   [ "${POT:-0}" -ge 1 ] || continue
   EXISTA=$(sqlite3 "$DB" "
     SELECT (SELECT COUNT(*) FROM legaturi l JOIN unelte x ON x.id=l.de_la
-             JOIN unelte y ON y.id=l.sper
+             JOIN unelte y ON y.id=l.spre
              WHERE x.nume='$A' AND y.nume='$B' AND l.tip_legatura='completeaza')
          + (SELECT COUNT(*) FROM propuneri_legaturi
              WHERE stare='propus' AND tip_legatura='completeaza'

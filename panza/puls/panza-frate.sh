@@ -17,11 +17,11 @@
 #   - idempotent: re-rularea nu produce duplicate
 #   - NU sterge si NU respinge nimic — decizia e a omului
 #
-# Programare recomandata: dupa puls, o data pe zi (ex. 20:15).
+# Programare recomandata: dupa puls, o data pe zi (ex. 21:15).
 # ============================================================================
 set -u
 
-DB="/root/muncitor/proiecte/Proiecte/catalog-app/catalog.db"
+DB="${PANZA_DB:-/root/muncitor/proiecte/Proiecte/catalog-app/catalog.db}"
 LOGDIR="/root/panza"
 DATA_ZI="$(date -u +%F)"
 LOG="$LOGDIR/frate-$DATA_ZI.log"
@@ -85,7 +85,7 @@ sqlite3 -separator '|' "$DB" "
   [ "${POT:-0}" -ge 1 ] || continue
   EXISTA=$(sqlite3 "$DB" "
     SELECT (SELECT COUNT(*) FROM legaturi l JOIN unelte x ON x.id=l.de_la
-             JOIN unelte y ON y.id=l.spre
+             JOIN unelte y ON y.id=l.sper
              WHERE x.nume='$A' AND y.nume='$B' AND l.tip_legatura='completeaza')
          + (SELECT COUNT(*) FROM propuneri_legaturi
              WHERE stare='propus' AND tip_legatura='completeaza'

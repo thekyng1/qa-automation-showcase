@@ -71,6 +71,26 @@ CREATE TABLE IF NOT EXISTS legaturi (
 CREATE INDEX IF NOT EXISTS idx_legaturi_de_la ON legaturi(de_la);
 CREATE INDEX IF NOT EXISTS idx_legaturi_spre  ON legaturi(spre);
 
+-- ---------- PRODUNERI LEGATURI (coada fratelui — omul decide) ----------
+-- Aceeasi structura ca in puls/propuneri.sql, ca sa functioneze si acolo,
+-- si aici, indiferent care ruleaza primul. Idempotent.
+CREATE TABLE IF NOT EXISTS propuneri_legaturi (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    de_la_nume      TEXT NOT NULL,
+    spre_nume       TEXT NOT NULL,
+    tip_legatura    TEXT NOT NULL
+                     CHECK (tip_legatura IN ('alternativa_la','completeaza',
+                                             'colaboreaza_cu')),
+    semnal          TEXT NOT NULL
+                     CHECK (semnal IN ('asemanare','complementaritate','covibrare')),
+    proba           TEXT NOT NULL,
+    stare           TEXT NOT NULL DEFAULT 'propus'
+                     CHECK (stare IN ('propus','aprobat','respins')),
+    data_propunere  TEXT NOT NULL DEFAULT (date('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_propuneri_stare ON propuneri_legaturi(stare);
+
 -- ---------- PROBE (arena: verdicturi PROBAT / INSTALAT / ESUAT / ANALIZA_REA) ----------
 CREATE TABLE IF NOT EXISTS probe (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,

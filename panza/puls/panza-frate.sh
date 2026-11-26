@@ -17,7 +17,7 @@
 #   - idempotent: re-rularea nu produce duplicate
 #   - NU sterge si NU respinge nimic — decizia e a omului
 #
-# Programare recomandata: dupa puls, o data pe zi (ex. 21:15).
+# Programare recomandata: dupa puls, o data pe zi (ex. 20:15).
 # ============================================================================
 set -u
 

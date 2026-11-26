@@ -22,7 +22,7 @@
 # ============================================================================
 set -u
 
-DB="/root/muncitor/proiecte/Proiecte/catalog-app/catalog.db"
+DB="${PANZA_DB:-/root/muncitor/proiecte/Proiecte/catalog-app/catalog.db}"
 LOGDIR="/root/panza"
 DATA_ZI="$(date -u +%F)"
 LOG="$LOGDIR/puls-$DATA_ZI.log"

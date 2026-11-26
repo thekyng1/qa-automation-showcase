@@ -1,0 +1,13 @@
+[Unit]
+Description=Panza — serverul web al panzei (port 8080)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/panza
+ExecStart=/usr/bin/python3 /opt/panza/panza.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
